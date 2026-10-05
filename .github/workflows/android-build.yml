@@ -12,7 +12,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Build APK without external actions
+      - name: Build and publish APK
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -21,7 +21,6 @@ jobs:
           export PATH="$JAVA_HOME/bin:$PATH"
 
           git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" repo
-          unzip -q repo/ChatWave-Android-Source.zip -d source
 
           curl -fsSL https://services.gradle.org/distributions/gradle-8.9-bin.zip -o gradle.zip
           unzip -q gradle.zip
@@ -31,9 +30,9 @@ jobs:
             "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" "build-tools;35.0.0"
           fi
 
-          ./gradle-8.9/bin/gradle -p source/chatwave_app :app:assembleDebug --stacktrace
+          ./gradle-8.9/bin/gradle -p repo/android-app :app:assembleDebug --stacktrace
 
-          cp source/chatwave_app/app/build/outputs/apk/debug/app-debug.apk KouroshGram-debug.apk
+          cp repo/android-app/app/build/outputs/apk/debug/app-debug.apk KouroshGram-debug.apk
           gh release create "build-${GITHUB_RUN_NUMBER}" KouroshGram-debug.apk \
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
