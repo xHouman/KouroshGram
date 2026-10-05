@@ -22,7 +22,8 @@ jobs:
 
           git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" repo
 
-          cat repo/.payload/kgui.part00 repo/.payload/kgui.part01 repo/.payload/kgui.part02 repo/.payload/kgui.part03 repo/.payload/kgui.part04 > payload.b64
+          cat repo/.payload/kgui.part00a repo/.payload/kgui.part00b1 repo/.payload/kgui.part00b2 \
+              repo/.payload/kgui.part01 repo/.payload/kgui.part02 repo/.payload/kgui.part03 repo/.payload/kgui.part04 > payload.b64
           base64 -d payload.b64 > KouroshGram-UI-Refresh.zip
           unzip -q KouroshGram-UI-Refresh.zip -d source
 
