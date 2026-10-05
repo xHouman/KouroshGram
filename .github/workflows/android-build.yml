@@ -21,11 +21,7 @@ jobs:
           export PATH="$JAVA_HOME/bin:$PATH"
 
           git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" repo
-
-          cat repo/.payload/kgui.part00a repo/.payload/kgui.part00b1 repo/.payload/kgui.part00b2 \
-              repo/.payload/kgui.part01 repo/.payload/kgui.part02 repo/.payload/kgui.part03 repo/.payload/kgui.part04 > payload.b64
-          base64 -d payload.b64 > KouroshGram-UI-Refresh.zip
-          unzip -q KouroshGram-UI-Refresh.zip -d source
+          base64 -d repo/.payload/kgram_v2_overlay.b64 | tar -xzf - -C repo/android-app
 
           curl -fsSL https://services.gradle.org/distributions/gradle-8.9-bin.zip -o gradle.zip
           unzip -q gradle.zip
@@ -35,11 +31,11 @@ jobs:
             "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" "build-tools;35.0.0"
           fi
 
-          ./gradle-8.9/bin/gradle -p source/chatwave_app :app:assembleDebug --stacktrace
+          ./gradle-8.9/bin/gradle -p repo/android-app :app:assembleDebug --stacktrace
 
-          cp source/chatwave_app/app/build/outputs/apk/debug/app-debug.apk KouroshGram-debug.apk
-          gh release create "build-${GITHUB_RUN_NUMBER}" KouroshGram-debug.apk \
+          cp repo/android-app/app/build/outputs/apk/debug/app-debug.apk KouroshGram-v2-debug.apk
+          gh release create "build-${GITHUB_RUN_NUMBER}" KouroshGram-v2-debug.apk \
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
-            --title "KouroshGram UI build ${GITHUB_RUN_NUMBER}" \
-            --notes "Telegram-inspired visual refresh build."
+            --title "KouroshGram compact dark UI ${GITHUB_RUN_NUMBER}" \
+            --notes "Compact dark Telegram/Nicegram-inspired visual overhaul."
