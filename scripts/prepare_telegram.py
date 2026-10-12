@@ -30,6 +30,9 @@ for module in ('TMessagesProj', 'TMessagesProj_App'):
     s = s.replace('applicationIdSuffix ".beta"', 'applicationIdSuffix ""')
     s = s.replace('"DEBUG_VERSION", "true"', '"DEBUG_VERSION", "false"')
     s = s.replace('"DEBUG_PRIVATE_VERSION", "true"', '"DEBUG_PRIVATE_VERSION", "false"')
+    if module == 'TMessagesProj':
+        s = s.replace('    defaultConfig {', '''    defaultConfig {
+        ndk { abiFilters "arm64-v8a", "x86_64" }''')
     p.write_text(s)
 p = root / 'gradle.properties'
 s = p.read_text().replace('APP_PACKAGE=org.telegram.messenger', 'APP_PACKAGE=com.kouroshgram.messenger')
@@ -73,6 +76,12 @@ edit(app, '        super.onConfigurationChanged(newConfig);', '''        super.o
         if (!kouroshInitialized) return;''')
 # No Firebase project has been configured for this fork. Keep normal in-app networking.
 edit(app, '        app.initPushServices();', '        // Kourosh Gram: FCM requires a project owned by this app; not enabled in this build.')
+
+# This fork has no Google identity; avoid advertising official-app login methods.
+edit('TMessagesProj/src/main/java/org/telegram/messenger/PushListenerController.java',
+    '        public boolean hasServices() {',
+    '''        public boolean hasServices() {
+            if (BuildVars.GOOGLE_AUTH_CLIENT_ID.isEmpty()) return false;''')
 
 # Preserve the brand when upstream cloud language packs are downloaded.
 loc = 'TMessagesProj/src/main/java/org/telegram/messenger/LocaleController.java'
