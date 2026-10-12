@@ -48,6 +48,11 @@ for name, value in {'APP_ID':'0', 'APP_HASH':'""', 'SAFETYNET_KEY':'""', 'GOOGLE
 s = s.replace('DEBUG_VERSION || sharedPreferences.getBoolean("logsEnabled", DEBUG_VERSION)', 'false')
 p.write_text(s)
 
+# Keep icon options and the intro wordmark under the fork's own brand.
+p = root / 'TMessagesProj/src/main/java/org/telegram/ui/LauncherIconController.java'
+p.write_text(re.sub(r'R.mipmap.icon[a-zA-Z0-9_]*', 'R.drawable.kourosh_icon', p.read_text()))
+edit('TMessagesProj/src/main/java/org/telegram/ui/IntroActivity.java', '        titles[0] = ssb;', '        titles[0] = "Kourosh Gram";')
+
 # Native initialization is delayed until private API setup is complete.
 app = 'TMessagesProj/src/main/java/org/telegram/messenger/ApplicationLoader.java'
 edit(app, '        // AndroidUtilities must be initialized before FileLog', '''        applicationHandler = new Handler(getMainLooper());
@@ -64,6 +69,8 @@ edit(app, '        // AndroidUtilities must be initialized before FileLog', ''' 
 edit(app, 'if (applicationInited || applicationContext == null)', 'if (applicationInited || applicationContext == null || !com.kouroshgram.setup.ApiConfig.ready(applicationContext))')
 edit(app, '    public static void startPushService() {', '''    public static void startPushService() {
         if (!com.kouroshgram.setup.ApiConfig.ready(applicationContext)) return;''')
+edit(app, '        super.onConfigurationChanged(newConfig);', '''        super.onConfigurationChanged(newConfig);
+        if (!kouroshInitialized) return;''')
 # No Firebase project has been configured for this fork. Keep normal in-app networking.
 edit(app, '        app.initPushServices();', '        // Kourosh Gram: FCM requires a project owned by this app; not enabled in this build.')
 
@@ -99,7 +106,7 @@ p.write_text(s)
 for p in list((root/'TMessagesProj/config').glob('**/AndroidManifest*.xml')) + [root/'TMessagesProj/src/main/AndroidManifest.xml']:
     s = p.read_text().replace('android:targetActivity="org.telegram.ui.LaunchActivity"', 'android:targetActivity="com.kouroshgram.setup.EntryActivity"')
     s = re.sub(r'android:(icon|roundIcon)="@mipmap/[^"]+"', r'android:\1="@drawable/kourosh_icon"', s)
-    s = re.sub(r'(<meta-data\s+android:name="com.google.android.geo.API_KEY"\s+android:value=")[^"]*("\s*/>)', r'\1\2', s)
+    s = re.sub(r'(<meta-data\s+android:name="com.google.android.(?:geo|maps.v2).API_KEY"\s+android:value=")[^"]*("\s*/>)', r'\1\2', s)
     p.write_text(s)
 
 print('Applied Kourosh Gram overlay: native Telegram UI, independent identity, private API setup.')

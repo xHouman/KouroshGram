@@ -13,7 +13,7 @@ permissions:
   contents: write
 concurrency:
   group: kourosh-android-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   build:
     runs-on: ubuntu-24.04
