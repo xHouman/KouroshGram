@@ -40,6 +40,12 @@ jobs:
           python3 scripts/verify_overlay.py
           rm telegram/TMessagesProj/config/release.keystore
           keytool -genkeypair -keystore telegram/TMessagesProj/config/release.keystore -storepass android -keypass android -alias androidkey -keyalg RSA -keysize 2048 -validity 3650 -dname 'CN=Kourosh Gram Test Build' -noprompt
+      - uses: actions/cache@v4
+        with:
+          path: |
+            telegram/TMessagesProj/.cxx
+            telegram/TMessagesProj/build/intermediates/cxx
+          key: telegram-native-f2908b14-ndk27-2abi-v1
       - name: Compile full Telegram Android application
         working-directory: telegram
         run: gradle :TMessagesProj_App:assembleAfatDebug --stacktrace --console=plain

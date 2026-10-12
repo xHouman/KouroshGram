@@ -32,13 +32,25 @@ x1,y1,x2,y2 = map(int,re.findall(r'\d+',node.get('bounds')))
 adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
 time.sleep(1)
 assert 'positive API ID' in dump('validation-ui.xml')
-# Test only startup using synthetic non-account developer values in the emulator sandbox.
-# They are never included in the APK and no phone authentication request is made.
+# Exercise the actual save button and deferred native initialization with synthetic
+# developer values, not a phone account. Nothing is bundled into the distributed APK.
+xml = dump('before-setup-save.xml')
+fields = [n for n in ET.fromstring(xml).iter('node') if n.get('class') == 'android.widget.EditText']
+assert len(fields) == 2
+for field, value in zip(fields, ('123456789', '00000000000000000000000000000000')):
+    x1,y1,x2,y2 = map(int,re.findall(r'\d+',field.get('bounds')))
+    adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
+    adb('shell','input','text',value)
+    adb('shell','input','keyevent','4')
+xml = dump('filled-setup.xml')
+node = next(n for n in ET.fromstring(xml).iter('node') if n.get('text') == 'Continue to Telegram sign-in')
+x1,y1,x2,y2 = map(int,re.findall(r'\d+',node.get('bounds')))
+adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
+time.sleep(12); alive()
+xml = dump('telegram-first-start.xml')
+assert 'API Hash' not in xml
 adb('shell','am','force-stop',pkg)
-fixture = '<map><int name="api_id" value="123456789"/><string name="api_hash">00000000000000000000000000000000</string></map>'
-adb('shell', 'run-as', pkg, 'mkdir', '-p', 'shared_prefs')
-subprocess.run(['adb','shell',f'run-as {pkg} sh -c \'cat > shared_prefs/kourosh_api_config.xml\''], input=fixture.encode(), check=True)
-launch(); time.sleep(12); alive()
+launch(); time.sleep(8); alive()
 xml = dump('telegram-login-ui.xml')
 assert 'API Hash' not in xml, 'Still stuck on developer gate'
 logs = adb('logcat','-d')

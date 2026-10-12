@@ -56,6 +56,14 @@ p = root / 'TMessagesProj/src/main/java/org/telegram/ui/LauncherIconController.j
 p.write_text(re.sub(r'R.mipmap.icon[a-zA-Z0-9_]*', 'R.drawable.kourosh_icon', p.read_text()))
 edit('TMessagesProj/src/main/java/org/telegram/ui/IntroActivity.java', '        titles[0] = ssb;', '        titles[0] = "Kourosh Gram";')
 
+for rel in ('DialogsActivity.java', 'Stories/DialogStoriesCell.java'):
+    p = root / 'TMessagesProj/src/main/java/org/telegram/ui' / rel
+    s = p.read_text().replace('R.drawable.telegram_logo_2', 'R.drawable.kourosh_wordmark')
+    s = s.replace('addView(telegramLogoView, LayoutHelper.createFrame(90, 22))', 'addView(telegramLogoView, LayoutHelper.createFrame(158, 25))')
+    p.write_text(s)
+for p in (root / 'TMessagesProj/src/main/res').glob('values*/styles.xml'):
+    p.write_text(p.read_text().replace('@drawable/tg_splash_320', '@drawable/kourosh_icon'))
+
 # Native initialization is delayed until private API setup is complete.
 app = 'TMessagesProj/src/main/java/org/telegram/messenger/ApplicationLoader.java'
 edit(app, '        // AndroidUtilities must be initialized before FileLog', '''        applicationHandler = new Handler(getMainLooper());
@@ -86,6 +94,7 @@ edit('TMessagesProj/src/main/java/org/telegram/messenger/PushListenerController.
 # Preserve the brand when upstream cloud language packs are downloaded.
 loc = 'TMessagesProj/src/main/java/org/telegram/messenger/LocaleController.java'
 edit(loc, '    private String getStringInternal(String key, String fallback, int res) {', '''    private String getStringInternal(String key, String fallback, int res) {
+        if (res == R.string.TelegramVersion || "TelegramVersion".equals(key)) return "Kourosh Gram for Android %1$s";
         if (res == R.string.AppName || res == R.string.AppNameBeta || "AppName".equals(key) || "AppNameBeta".equals(key)) return "Kourosh Gram";''')
 for p in (root / 'TMessagesProj/src/main/res').glob('values*/strings.xml'):
     s = p.read_text()

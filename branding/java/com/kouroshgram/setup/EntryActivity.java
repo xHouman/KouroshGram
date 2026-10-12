@@ -135,6 +135,11 @@ public final class EntryActivity extends Activity {
         ((ApplicationLoader)getApplication()).initializeKourosh();
         enter();
     }
+    @Override protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        if (ApiConfig.ready(this)) enter();
+    }
     private void enter() {
         Intent next = new Intent(getIntent());
         next.setClass(this, LaunchActivity.class);
